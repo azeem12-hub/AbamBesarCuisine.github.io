@@ -418,28 +418,56 @@ height: 140px;
  margin-bottom: 15px;
 }
 .order-form {
- display: flex;
- flex-direction: column;
- gap: 15px;
- max-width: 400px;
- margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 500px;
+  margin: auto;
 }
-.order-form input {
- padding: 12px;
- border: 1px solid #ccc;
- border-radius: 10px;
+
+.order-form input,
+.order-form textarea,
+.order-form select {
+  padding: 12px 15px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 1rem;
+  width: 100%;
+  resize: none;
+  transition: all 0.3s ease;
 }
+
+.order-form input:focus,
+.order-form textarea:focus,
+.order-form select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
 .order-form button {
- padding: 12px;
- border: none;
- border-radius: 10px;
- background: linear-gradient(135deg,#007bff,#00c6ff);
- color: #fff;
- font-weight: bold;
- cursor: pointer;
+  padding: 14px 25px;
+  border: none;
+  border-radius: 25px;
+  background: linear-gradient(135deg, #007bff, #00c6ff);
+  color: #fff;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.3s, opacity 0.3s;
 }
+
 .order-form button:hover {
- opacity: 0.9;
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .order-form {
+    gap: 12px;
+    max-width: 90%;
+  }
 }
 
 footer .social {
@@ -649,15 +677,22 @@ src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d248.07228474016523!2d
 </section>
 
 <section class="order" id="order" data-aos="fade-up">
- <h2>ORDER ONLINE</h2>
- <p>Isi borang ringkas dan kami akan terus WhatsApp anda untuk confirm order.</p>
- <form class="order-form" onsubmit="sendOrder(event)">
-<input type="text" id="nama" placeholder="Nama Anda" required>
-<input type="text" id="orderText" placeholder="Pesanan (cth: 2 Bawang Goreng+ 1 Kuih Siput)" required>
-<button type="submit">Hantar Order</button>
- </form>
+  <h2>ORDER ONLINE</h2>
+  <p>Isi borang ringkas dan kami akan terus WhatsApp anda untuk confirm order.</p>
+  
+  <form class="order-form" onsubmit="sendOrder(event)">
+    <input type="text" id="nama" placeholder="Nama Anda" required>
+    <input type="tel" id="telefon" placeholder="Nombor Telefon (contoh: 0123456789)" required>
+    <textarea id="alamat" placeholder="Alamat Penuh (untuk penghantaran)" rows="3"></textarea>
+    <input type="text" id="orderText" placeholder="Pesanan (cth: 2 Bawang Goreng + 1 Kuih Siput)" required>
+    <select id="penghantaran">
+      <option value="Walk-in">Walk-in / Ambil Sendiri</option>
+      <option value="Delivery">Penghantaran / Pos</option>
+    </select>
+    <textarea id="catatan" placeholder="Catatan Tambahan (cth: kurang pedas, bungkus plastik)" rows="2"></textarea>
+    <button type="submit">Hantar Order</button>
+  </form>
 </section>
-
 <section class="booking" id="booking" data-aos="fade-up">
 <h2>CONTACT</h2>
 <p>Sebarang pertanyaan atau tempahan sila hubungi kami melalui WhatsApp:</p>
@@ -728,6 +763,33 @@ WhatsApp
 </div>
 </div>
 
+<div class="popup" id="popupDelivery">
+  <div class="popup-content">
+    <span class="close-btn" onclick="closePopupDelivery()">&times;</span>
+    <h3>Makluman</h3>
+    <p>Bubur Ayam hanya untuk walk-in / ambil sendiri. Sila pilih Walk-in jika ingin order Bubur Ayam.</p>
+    <button onclick="closePopupDelivery()" style="padding:10px 20px; border:none; border-radius:8px; background:#007bff; color:#fff; cursor:pointer;">Faham</button>
+  </div>
+</div>
+
+<div class="popup" id="popupDelivery">
+  <div class="popup-content">
+    <span class="close-btn" onclick="closePopupDelivery()">&times;</span>
+    <h3>Makluman</h3>
+    <p>Bubur Ayam hanya untuk walk-in / ambil sendiri. Sila pilih Walk-in jika ingin order Bubur Ayam.</p>
+    <button onclick="closePopupDelivery()" style="padding:10px 20px; border:none; border-radius:8px; background:#007bff; color:#fff; cursor:pointer;">Faham</button>
+  </div>
+</div>
+
+
+<div class="popup" id="popupAlamat">
+  <div class="popup-content">
+    <span class="close-btn" onclick="closePopupAlamat()">&times;</span>
+    <h3>Makluman</h3>
+    <p>Sila isi alamat penuh untuk penghantaran.</p>
+    <button onclick="closePopupAlamat()" style="padding:10px 20px; border:none; border-radius:8px; background:#007bff; color:#fff; cursor:pointer;">Faham</button>
+  </div>
+
 <script>
 function openPopup(title,desc,img){
 document.getElementById('popup-title').innerText = title;
@@ -749,11 +811,26 @@ once: true
 
 <script>
 function sendOrder(e){
-e.preventDefault();
-let nama = document.getElementById("nama").value;
-let order = document.getElementById("orderText").value;
-let msg = `Nama: ${nama}%0AOrder: ${order}`;
-window.open(`https://wa.me/60179058047?text=${msg}`, "_blank");
+  e.preventDefault();
+  
+  let nama = document.getElementById("nama").value;
+  let telefon = document.getElementById("telefon").value;
+  let alamat = document.getElementById("alamat").value;
+  let order = document.getElementById("orderText").value;
+  let penghantaran = document.getElementById("penghantaran").value;
+  let catatan = document.getElementById("catatan").value;
+
+  if(penghantaran === "Delivery" && order.toLowerCase().includes("bubur ayam")){
+    alert("Bubur Ayam hanya untuk walk-in / ambil sendiri. Sila pilih Walk-in.");
+    return;
+  }
+
+  let msg = `Nama: ${nama}%0ATelefon: ${telefon}%0APenghantaran: ${penghantaran}`;
+  if(penghantaran === "Delivery" && alamat) msg += `%0AAlamat: ${alamat}`;
+  msg += `%0AOrder: ${order}`;
+  if(catatan) msg += `%0ACatatan: ${catatan}`;
+
+  window.open(`https://wa.me/60179058047?text=${msg}`, "_blank");
 }
 </script>
 <script>
@@ -764,6 +841,75 @@ const answer = btn.nextElementSibling;
 answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
 });
 });
+</script>
+
+<script>
+function sendOrder(e){
+  e.preventDefault();
+  
+  let nama = document.getElementById("nama").value;
+  let telefon = document.getElementById("telefon").value;
+  let alamat = document.getElementById("alamat").value;
+  let order = document.getElementById("orderText").value;
+  let penghantaran = document.getElementById("penghantaran").value;
+  let catatan = document.getElementById("catatan").value;
+
+  if(penghantaran === "Delivery" && order.toLowerCase().includes("bubur ayam")){
+    document.getElementById("popupDelivery").style.display = "flex";
+    return;
+  }
+
+  let msg = `Nama: ${nama}%0ATelefon: ${telefon}%0APenghantaran: ${penghantaran}`;
+  if(penghantaran === "Delivery" && alamat) msg += `%0AAlamat: ${alamat}`;
+  msg += `%0AOrder: ${order}`;
+  if(catatan) msg += `%0ACatatan: ${catatan}`;
+
+  window.open(`https://wa.me/60179058047?text=${msg}`, "_blank");
+}
+
+function closePopupDelivery(){
+  document.getElementById("popupDelivery").style.display = "none";
+}
+</script>
+
+<script>
+function sendOrder(e){
+  e.preventDefault();
+
+  let nama = document.getElementById("nama").value;
+  let telefon = document.getElementById("telefon").value;
+  let alamat = document.getElementById("alamat").value.trim();
+  let order = document.getElementById("orderText").value;
+  let penghantaran = document.getElementById("penghantaran").value;
+  let catatan = document.getElementById("catatan").value;
+
+
+  if(penghantaran === "Delivery" && order.toLowerCase().includes("bubur ayam")){
+    document.getElementById("popupDelivery").style.display = "flex";
+    return;
+  }
+
+
+  if(penghantaran === "Delivery" && alamat === ""){
+    document.getElementById("popupAlamat").style.display = "flex";
+    return;
+  }
+
+  let msg = `Nama: ${nama}%0ATelefon: ${telefon}%0APenghantaran: ${penghantaran}`;
+  if(penghantaran === "Delivery") msg += `%0AAlamat: ${alamat}`;
+  msg += `%0AOrder: ${order}`;
+  if(catatan) msg += `%0ACatatan: ${catatan}`;
+
+  window.open(`https://wa.me/60179058047?text=${msg}`, "_blank");
+}
+
+function closePopupDelivery(){
+  document.getElementById("popupDelivery").style.display = "none";
+}
+
+function closePopupAlamat(){
+  document.getElementById("popupAlamat").style.display = "none";
+}
 </script>
 </body>
 </html>
