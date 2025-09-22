@@ -681,16 +681,39 @@ src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d248.07228474016523!2d
   <h2>ORDER ONLINE</h2>
   <p>Isi borang ringkas dan kami akan terus WhatsApp anda untuk confirm order.</p>
   
-  <form class="order-form" onsubmit="sendOrder(event)">
+  <form class="order-form" id="orderForm" onsubmit="sendOrder(event)">
+    
     <input type="text" id="nama" placeholder="Nama Anda" required>
     <input type="tel" id="telefon" placeholder="Nombor Telefon (contoh: 0123456789)" required>
     <textarea id="alamat" placeholder="Alamat Penuh (untuk penghantaran)" rows="3"></textarea>
-    <input type="text" id="orderText" placeholder="Pesanan (cth: 2 Bawang Goreng + 1 Kuih Siput)" required>
+    
+ <div id="orderItemsContainer">
+  <div class="order-item" style="display:flex; gap:10px; margin-bottom:10px;">
+    <select class="order-menu" required>
+      <option value="" disabled selected>Pilih Menu</option>
+      <option value="Bubur Ayam">Bubur Ayam - RM5</option>
+      <option value="Bubur Ayam RM4">Bubur Ayam - RM4</option>
+      <option value="Bawang Goreng">Bawang Goreng - RM10</option>
+      <option value="Bawang Pedas + Bilis">Bawang Pedas + Bilis - RM15</option>
+      <option value="Bawang Putih">Bawang Putih - RM15</option>
+      <option value="Bawang Putih + Halia">Bawang Putih + Halia - RM17</option>
+      <option value="Halia">Halia - RM22</option>
+      <option value="Kuih Siput RM5">Kuih Siput - RM5</option>
+      <option value="Kuih Siput RM10">Kuih Siput - RM10</option>
+    </select>
+    <input type="number" class="order-qty" placeholder="Kuantiti" min="1" value="1" required>
+  </div>
+</div>
+
+<button type="button" onclick="addOrderItem()" style="margin-bottom:10px; background:#00c6ff;">Tambah Item Lagi</button>
+    
     <select id="penghantaran">
       <option value="Walk-in">Walk-in / Ambil Sendiri</option>
       <option value="Delivery">Penghantaran / Pos</option>
     </select>
+    
     <textarea id="catatan" placeholder="Catatan Tambahan (cth: kurang pedas, bungkus plastik)" rows="2"></textarea>
+    
     <button type="submit">Hantar Order</button>
   </form>
 </section>
@@ -912,5 +935,72 @@ function closePopupAlamat(){
   document.getElementById("popupAlamat").style.display = "none";
 }
 </script>
+
+<script>
+// Fungsi tambah item baru
+function addOrderItem(){
+  const container = document.getElementById("orderItemsContainer");
+  const div = document.createElement("div");
+  div.classList.add("order-item");
+  div.style.display = "flex";
+  div.style.gap = "10px";
+  div.style.marginBottom = "10px";
+  div.innerHTML = `
+    <select class="order-menu" required>
+      <option value="" disabled selected>Pilih Menu</option>
+      <option value="Bubur Ayam">Bubur Ayam - RM5</option>
+      <option value="Bubur Ayam RM4">Bubur Ayam - RM4</option>
+      <option value="Bawang Goreng">Bawang Goreng - RM10</option>
+      <option value="Bawang Pedas + Bilis">Bawang Pedas + Bilis - RM15</option>
+      <option value="Bawang Putih">Bawang Putih - RM15</option>
+      <option value="Bawang Putih + Halia">Bawang Putih + Halia - RM17</option>
+      <option value="Halia">Halia - RM22</option>
+      <option value="Kuih Siput RM5">Kuih Siput - RM5</option>
+      <option value="Kuih Siput RM10">Kuih Siput - RM10</option>
+    </select>
+    <input type="number" class="order-qty" placeholder="Kuantiti" min="1" value="1" required>
+  `;
+  container.appendChild(div);
+}
+
+function sendOrder(e){
+  e.preventDefault();
+
+  let nama = document.getElementById("nama").value;
+  let telefon = document.getElementById("telefon").value;
+  let alamat = document.getElementById("alamat").value.trim();
+  let penghantaran = document.getElementById("penghantaran").value;
+  let catatan = document.getElementById("catatan").value;
+
+  const items = document.querySelectorAll(".order-item");
+  let orderText = "";
+  let containsBuburAyam = false;
+
+  items.forEach(item => {
+    const menu = item.querySelector(".order-menu").value;
+    const qty = item.querySelector(".order-qty").value;
+    if(menu.toLowerCase().includes("bubur ayam")) containsBuburAyam = true;
+    orderText += `${qty} x ${menu}\n`;
+  });
+
+  if(penghantaran === "Delivery" && containsBuburAyam){
+    document.getElementById("popupDelivery").style.display = "flex";
+    return;
+  }
+
+  if(penghantaran === "Delivery" && alamat === ""){
+    document.getElementById("popupAlamat").style.display = "flex";
+    return;
+  }
+
+  let msg = `Nama: ${nama}%0ATelefon: ${telefon}%0APenghantaran: ${penghantaran}`;
+  if(penghantaran === "Delivery") msg += `%0AAlamat: ${alamat}`;
+  msg += `%0AOrder:%0A${encodeURIComponent(orderText)}`;
+  if(catatan) msg += `%0ACatatan: ${catatan}`;
+
+  window.open(`https://wa.me/60179058047?text=${msg}`, "_blank");
+}
+</script>
+
 </body>
 </html>
