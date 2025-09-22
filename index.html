@@ -1019,7 +1019,7 @@ const priceList = {
   "Kuih Siput RM10": 10
 };
 
-
+// Contoh ringkas updatePrice
 function updatePrice() {
   const items = document.querySelectorAll(".order-item");
   let total = 0;
@@ -1034,7 +1034,7 @@ function updatePrice() {
       total += priceList[menu] * qty;
 
       if(menu === "Kuih Siput RM5") plastikQty += qty;
-      else if(menu !== "Bubur Ayam") botolQty += qty;
+      else if(menu !== "Bubur Ayam") botolQty += qty; // Bubur ayam tak masuk postage
     }
   });
 
@@ -1049,7 +1049,7 @@ function updatePrice() {
       postage += (botolQty <=5) ? 12 : (botolQty <=10 ? 18 : 18 + Math.ceil((botolQty-10)/5)*6);
     }
   } else {
-    postage = 0; 
+    postage = 0; // walk-in → tiada postage
   }
 
   document.getElementById("orderPrice").innerHTML = `
@@ -1085,6 +1085,35 @@ document.getElementById("orderItemsContainer").addEventListener("input", updateP
 document.getElementById("orderItemsContainer").addEventListener("change", updatePrice);
 document.getElementById("penghantaran").addEventListener("change", updatePrice);
 updatePrice();
+</script>
+
+<script>
+function updateDeliveryOptions() {
+  const items = document.querySelectorAll(".order-item .order-menu");
+  const penghantaranSelect = document.getElementById("penghantaran");
+  
+  let containsBuburAyam = false;
+  items.forEach(select => {
+    if (select.value.toLowerCase().includes("bubur ayam")) containsBuburAyam = true;
+  });
+  
+  if (containsBuburAyam) {
+    penghantaranSelect.value = "Walk-in";
+    for (let i = 0; i < penghantaranSelect.options.length; i++) {
+      if (penghantaranSelect.options[i].value !== "Walk-in") {
+        penghantaranSelect.options[i].disabled = true;
+      }
+    }
+  } else {
+    for (let i = 0; i < penghantaranSelect.options.length; i++) {
+      penghantaranSelect.options[i].disabled = false;
+    }
+  }
+}
+
+
+document.getElementById("orderItemsContainer").addEventListener("change", updateDeliveryOptions);
+document.getElementById("penghantaran").addEventListener("change", updateDeliveryOptions);
 </script>
 </body>
 </html>
